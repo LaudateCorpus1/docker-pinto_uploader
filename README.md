@@ -6,12 +6,12 @@
 ```
 #manual
 docker run -v /var/lib/pinto:/var/lib/pinto -p3000:3000 avastsoftware/pinto_uploader prefork
-#or as service (only systemd linux)
+#or as a service (only systemd linux)
 cp pinto_uploader.service /etc/systemd/system/
 systemctl start pinto_uploader.service
 ```
 
-### send distribution to pinto uploader
+### send a distribution to pinto uploader
 ```
 curl -XPOST --data-binary @Perl-Module-1.0.0.tar.gz upload.pinto.server:3000/add?author=AUTHOR&dist=Perl-Module-1.0.0.tar.gz
 #or
@@ -21,17 +21,26 @@ curl -F "dist=@Perl-Module-1.0.0.tar.gz" upload.pinto.server:3000/add?author=AUT
 ```
 
 ## DESCRIPTION
-[Pinto](https://metacpan.org/pod/pinto) is awesome tool for make internal repository.
-[avastsoftware/pinto](https://hub.docker.com/r/avastsoftware/pinto/) is docker container with *pintod* on entrypoint (and pinto tool).
-But *pintod* have 'only' same interface as cpan => distributions is possible only get.
-This project ([avastsoftware/pinto_uploader](https://hub.docker.com/r/avastsoftware/pinto_uploader/) is solution of central (internal) pinto repositories.
+[Pinto](https://metacpan.org/pod/pinto) is an awesome tool for managing
+internal repository of Perl distributions.
+[avastsoftware/pinto](https://hub.docker.com/r/avastsoftware/pinto/) is docker
+container with *pintod* on entrypoint (and with pinto tool inside).
+However, *pintod* 'only' has the same interface as CPAN, i.e. it only enables
+distributions to be fetched from it. This project
+[avastsoftware/pinto_uploader](https://hub.docker.com/r/avastsoftware/pinto_uploader/)
+complements it. It enables to upload Perl distributions to the pinto
+repository (e.g. a company-wide internal repository).
 
-Warning! 
-Pushing in to *pinto uploader* doesn't authorized, everyone should push distribution to *pinto uploader*.
-Easy solution is *Basic access authentication* on proxy http server before *pinto uploader*
+## CAVEATS AND LIMITATIONS
+There is no authorization / authentication implemented: everyone who can access
+the server is able to push a distribution into the repository. A possible
+solution is to put *Basic access authentication* on proxy http server before
+*pinto uploader*.
 
 ## SEE ALSO
-*pinto uploader* is a replacement of manual call pinto on some pinto server with *avastsoftware/pinto* service 
+*pinto uploader* is a replacement for manual call of pinto command on a pinto
+server with *avastsoftware/pinto* service.
+d
 ```
 scp Perl-Module-1.0.0.tar.gz pinto.server:/tmp
 ssh pinto.server docker run -v/var/lib/pinto:/var/lib/pinto avastsoftware/pinto pinto add /tmp/Perl-Module-1.0.0.tar.gz --author AUTHOR
