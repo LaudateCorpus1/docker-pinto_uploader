@@ -1,0 +1,87 @@
+#!/usr/bin/env perl
+use Mojolicious::Lite;
+
+use Capture::Tiny qw(capture);
+use Path::Tiny;
+
+helper 'save_post_to_temp_file' => sub {
+    my ($controller, $tmp_dir, $dist) = @_;
+
+    my $uploaded_dist;
+    if (my $upload = $controller->req->upload('dist')) {
+	$uploaded_dist = $upload->asset();
+	$dist = $upload->filename();
+    }
+    else {
+    	$uploaded_dist = $controller->req->content->asset();
+    }
+
+    my $tmp_dist;
+    if (!$dist) {
+        $tmp_dist = Path::Tiny->tempfile(DIR => $tmp_dir, SUFFIX => '.tar.gz');
+    }
+    else {
+        $tmp_dist = path($tmp_dir, $dist);
+    }
+
+    $uploaded_dist->move_to($tmp_dist);
+
+    return $tmp_dist;
+};
+
+post '/add' => sub {
+    my ($controller) = @_;
+
+    my $dist = $controller->param('dist');
+    my $author = $controller->param('author');
+
+    my $tmp_dir = Path::Tiny->tempdir();
+    my $tmp_dist = $controller->save_post_to_temp_file($tmp_dir, $dist);
+
+    my $cmd = "pinto add";
+    if ($author) {
+        $cmd .= " --author $author";
+    }
+    $cmd .= " $tmp_dist";
+
+    my $pinto_ret_code;
+    my ($stdout, $stderr) = capture {
+        $pinto_ret_code = system $cmd;
+    };
+
+    my %render;
+    if ($pinto_ret_code) {
+	if ($stderr =~ /Cannot find .+ anywhere/) {
+	    return $controller->render(
+	    	text   => "$stderr\n",
+	    	status => 424, 
+	    );
+	}
+	elsif ($stderr =~ /A distribution already exists/) {
+	    return $controller->render(
+	    	text   => "$stderr\n",
+	    	status => 409, 
+	    );
+	}
+	else {
+	    return $controller->render(
+                text    => "$cmd failed\n$stderr\n",
+                status  => 500,
+            );
+	}
+    }
+
+    if ($stdout || $stderr) {
+        return $controller->render(
+            text   => sprintf "Package added\nwarning(s):\n%s\n", $stdout || $stderr,
+            status => 200,
+        );
+    }
+
+    return $controller->render(
+        text   => "Package added\n",
+        status => 200,
+    );
+};
+
+app->start;
