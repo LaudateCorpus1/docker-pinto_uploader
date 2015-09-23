@@ -40,7 +40,6 @@ solution is to put *Basic access authentication* on proxy http server before
 ## SEE ALSO
 *pinto uploader* is a replacement for manual call of pinto command on a pinto
 server with *avastsoftware/pinto* service.
-d
 ```
 scp Perl-Module-1.0.0.tar.gz pinto.server:/tmp
 ssh pinto.server docker run -v/var/lib/pinto:/var/lib/pinto avastsoftware/pinto pinto add /tmp/Perl-Module-1.0.0.tar.gz --author AUTHOR
