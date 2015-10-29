@@ -4,6 +4,15 @@ use Mojolicious::Lite;
 use Capture::Tiny qw(capture);
 use Path::Tiny;
 
+app->config(
+    hypnotoad => {
+        listen             => ['http://*:80'],
+        graceful_timeout   => 300,
+        inactivity_timeout => 240,
+        heartbeat_timeout  => 240,
+    }
+);
+
 helper 'save_post_to_temp_file' => sub {
     my ($controller, $tmp_dir, $dist) = @_;
 
