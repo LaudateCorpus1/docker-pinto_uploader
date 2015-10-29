@@ -6,7 +6,7 @@ use Path::Tiny;
 
 app->config(
     hypnotoad => {
-        listen             => ['http://*:80'],
+        listen             => ['http://*:8080'],
         graceful_timeout   => 300,
         inactivity_timeout => 240,
         heartbeat_timeout  => 240,
