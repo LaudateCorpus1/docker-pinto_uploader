@@ -18,6 +18,11 @@ curl -XPOST --data-binary @Perl-Module-1.0.0.tar.gz upload.pinto.server:3000/add
 wget --post-file Perl-Module-1.0.0.tar.gz upload.pinto.server:3000/add?author=AUTHOR&dist=Perl-Module-1.0.0.tar.gz
 #or
 curl -F "dist=@Perl-Module-1.0.0.tar.gz" upload.pinto.server:3000/add?author=AUTHOR
+
+#for using in CI job - exit if service return no_success http code, but eat error message from server 
+curl -sSf -F "dist=@Perl-Module-1.0.0.tar.gz" upload.pinto.server:3000/add?author=AUTHOR
+#or (this is maybe ogly, but print error message)
+if [[$(curl -s -o /dev/stderr -w "%{http_code}" -F dist=@Perl-Module-1.0.0.tar.gz 'upload.pinto.server:3000/add?author=AUTHOR') != 200]]; then exit 1; fi
 ```
 
 ## DESCRIPTION
